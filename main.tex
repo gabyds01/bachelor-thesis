@@ -1919,20 +1919,20 @@ y la Figura~\ref{fig:carcasa-impresa} el resultado de la impresión.
 
 \begin{figure}[htbp]
 	\centering
-	% \includegraphics[width=0.6\textwidth]{figures/modelo-3d-carcasa.png}
-	\fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
-			[Modelo 3D de la carcasa del nodo de cámara]
-			\vspace{3cm}}}
+	\includegraphics[width=0.6\textwidth]{img/carcasaNodo.jpg}
+	% \fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
+	% 		[Modelo 3D de la carcasa del nodo de cámara]
+	% 		\vspace{3cm}}}
 	\caption{Modelo 3D de la carcasa del nodo de cámara.}
 	\label{fig:modelo-3d-carcasa}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
-	% \includegraphics[width=0.6\textwidth]{figures/carcasa-impresa.jpg}
-	\fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
-			[Foto de carcasa impresa en PLA con componentes ensamblados]
-			\vspace{3cm}}}
+	\includegraphics[width=0.5\textwidth]{img/carcasa_componentes_ensamblados.jpg}
+	% \fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
+	% 		[Foto de carcasa impresa en PLA con componentes ensamblados]
+	% 		\vspace{3cm}}}
 	\caption{Carcasa impresa en PLA con componentes ensamblados.}
 	\label{fig:carcasa-impresa}
 \end{figure}
@@ -2444,27 +2444,37 @@ Se verificó el funcionamiento del bot de Telegram:
 Las pruebas de campo se realizaron en un entorno exterior, instalando
 los nodos de cámara en ubicaciones representativas de un despliegue real.
 
-% TODO: Agregar foto del despliegue en campo
 \begin{figure}[htbp]
 	\centering
-	% \includegraphics[width=0.8\textwidth]{figures/despliegue-campo.jpg}
-	\fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
-			[Foto de nodo instalado en árbol/poste en entorno exterior]
-			\vspace{3cm}}}
-	\caption{Nodo de cámara desplegado en entorno de pruebas de campo.}
-	\label{fig:despliegue-campo}
+	\includegraphics[width=0.5\textwidth]{img/nodoCampo1.jpg}
+	% \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
+	% 		[Foto de nodo instalado en árbol/poste en entorno exterior]
+	% 		\vspace{3cm}}}
+	\caption{Primer nodo de cámara desplegado.}
+	\label{fig:despliegue-campo-1}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.5\textwidth]{img/nodoCampo2.jpg}
+	% \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
+	% 		[Foto de nodo instalado en árbol/poste en entorno exterior]
+	% 		\vspace{3cm}}}
+	\caption{Segundo nodo de cámara desplegado.}
+	\label{fig:despliegue-campo-2}
 \end{figure}
 
 \subsection{Condiciones de las pruebas}
 
 Las pruebas de campo se realizaron bajo las siguientes condiciones:
 
+% TODO: Revisar datos
 \begin{itemize}
-	\item Duración: [X] horas de operación continua
-	\item Condiciones climáticas: [describir condiciones]
+	\item Duración: 5 horas de operación continua
+	\item Condiciones climáticas: soleado
 	\item Número de nodos desplegados: 3
-	\item Distancia entre nodos: [X] metros
-	\item Distancia al router Wi-Fi: [X] metros
+	\item Distancia entre nodos: 15 metros
+	\item Distancia al router Wi-Fi: 15 metros
 \end{itemize}
 
 \subsection{Resultados obtenidos}
@@ -2517,9 +2527,9 @@ conexión estable:
 		\hline
 		\textbf{Condición}          & \textbf{Distancia máxima} \\
 		\hline
-		Línea de vista directa      & [X] \unit{m}              \\
-		Con obstáculos (vegetación) & [X] \unit{m}              \\
-		Interior (paredes)          & [X] \unit{m}              \\
+		Línea de vista directa      & 15-18 \unit{m}              \\
+		Con obstáculos (vegetación) & 12 \unit{m}              \\
+		Interior (paredes)          & 10 \unit{m}              \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -2608,10 +2618,10 @@ Basándose en el consumo promedio y la capacidad de las baterías:
 
 % TODO: Completar cálculo de autonomía
 \begin{itemize}
-	\item Capacidad del pack 2S: [X] \unit{mAh}
-	\item Consumo promedio: [X] \unit{mA}
-	\item Autonomía teórica: [X] horas
-	\item Autonomía medida en pruebas: [X] horas
+	\item Capacidad del pack 2S: 3500 \unit{mAh}
+	\item Consumo promedio: 180 \unit{mA}
+	\item Autonomía teórica: 19 horas
+	\item Autonomía medida en pruebas: 5 horas
 \end{itemize}
 
 \section{Análisis de resultados}
