@@ -1909,12 +1909,10 @@ y contempla:
   \item Puntos de montaje para fijación en superficies
 \end{itemize}
 
-El plano 2D del diseño final se incluye en el Anexo~\ref{anexo:planos-carcasa}
+El plano 2D del diseño final se incluye en el apéndice~\ref{anexo:planos-carcasa}
 (Figura~\ref{fig:plano-carcasa} y Figura~\ref{fig:plano-base}). El modelo 3D
 modificado está disponible públicamente en Printables\footnote{\url{www.printables.com/model/1532349-case-for-esp32_cam-trail-camera-pir-sensor-buck-co}}.
-
-La Figura~\ref{fig:modelo-3d-carcasa} muestra el modelo 3D de la carcasa
-y la Figura~\ref{fig:carcasa-impresa} el resultado de la impresión.
+La figura~\ref{fig:modelo-3d-carcasa} muestra el modelo 3D de la carcasa.
 
 \begin{figure}[htbp]
   \centering
@@ -1924,16 +1922,6 @@ y la Figura~\ref{fig:carcasa-impresa} el resultado de la impresión.
   %     \vspace{3cm}}}
   \caption{Modelo 3D de la carcasa del nodo de cámara.}
   \label{fig:modelo-3d-carcasa}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.5\textwidth]{img/carcasa_componentes_ensamblados.jpg}
-  % \fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
-  %     [Foto de carcasa impresa en PLA con componentes ensamblados]
-  %     \vspace{3cm}}}
-  \caption{Carcasa impresa en PLA con componentes ensamblados.}
-  \label{fig:carcasa-impresa}
 \end{figure}
 
 \section{Nodo raíz (root-node)}
@@ -2020,18 +2008,18 @@ Cada nodo habilita su propia pila de protocolos \gls{lwip}, obteniendo una
 dirección IP que le permite comunicarse de forma independiente con la red
 externa.
 
-La Figura~\ref{fig:topologia-mesh} ilustra la topología de la red y el flujo
-de datos desde los nodos de cámara hasta el servidor.
+% La Figura~\ref{fig:topologia-mesh} ilustra la topología de la red y el flujo
+% de datos desde los nodos de cámara hasta el servidor.
 
-\begin{figure}[htbp]
-  \centering
-  % \includegraphics[width=0.8\textwidth]{figures/topologia-mesh.png}
-  \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
-      [Topología de la red ESP-MESH-LITE y flujo de datos]
-  \vspace{3cm}}}
-  \caption{Topología de la red ESP-MESH-LITE y flujo de datos.}
-  \label{fig:topologia-mesh}
-\end{figure}
+% \begin{figure}[htbp]
+%   \centering
+%   % \includegraphics[width=0.8\textwidth]{figures/topologia-mesh.png}
+%   \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
+%       [Topología de la red ESP-MESH-LITE y flujo de datos]
+%   \vspace{3cm}}}
+%   \caption{Topología de la red ESP-MESH-LITE y flujo de datos.}
+%   \label{fig:topologia-mesh}
+% \end{figure}
 
 \subsection{Protocolo de comunicación}
 
@@ -2391,6 +2379,13 @@ Las pruebas se realizaron utilizando la siguiente configuración de hardware:
     %   accesible mediante túnel VPN (Pangolin, basado en WireGuard) y proxy
     %   reverso (Traefik)
 \end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{img/carcasa_componentes_ensamblados.jpg}
+  \caption{Carcasa impresa en PLA con componentes ensamblados.}
+  \label{fig:carcasa-impresa}
+\end{figure}
 
 % TODO: Agregar foto del hardware ensamblado
 \begin{figure}[htbp]
