@@ -19,7 +19,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+\usetikzlibrary{shapes.geometric, shapes.symbols, arrows.meta, positioning, fit, backgrounds, calc}
 
 % Código fuente
 \usepackage{listings}
@@ -2276,10 +2276,76 @@ Los contenedores se comunican a través de una red interna aislada, administrada
 
 \begin{figure}[htbp]
 	\centering
-	% \includegraphics[width=0.8\textwidth]{figures/docker-compose-arquitectura.png}
-	\fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
-	[Arquitectura de contenedores Docker del servidor]
-	\vspace{3cm}}}
+	\begin{tikzpicture}[
+	scale=0.8,
+	font=\sffamily,
+	>=Latex,
+	node distance=14mm and 22mm,
+	service/.style={
+		draw=black!70,
+		rounded corners=2pt,
+		fill=blue!3,
+		minimum width=22mm,
+		minimum height=9mm,
+		align=center,
+		line width=0.9pt
+	},
+	volume/.style={
+		draw=black!70,
+		cylinder,
+		shape border rotate=90,
+		aspect=0.28,
+		minimum height=9mm,
+		minimum width=18mm,
+		align=center,
+		fill={rgb,255:red,253;green,250;blue,228},
+		draw={rgb,255:red,134;green,122;blue,34},
+		line width=0.9pt
+	},
+	bindmount/.style={
+		draw=black!70,
+		diamond,
+		aspect=2,
+		inner xsep=2pt,
+		inner ysep=1.5pt,
+		fill={rgb,255:red,253;green,250;blue,228},
+		draw={rgb,255:red,134;green,122;blue,34},
+		line width=0.9pt,
+		font=\ttfamily\footnotesize,
+		align=center
+	},
+	app/.style={-{Latex[length=2.2mm,width=1.6mm]}, draw=black!70, line width=0.95pt},
+	mount/.style={Latex-Latex, draw=black!65, dashed, line width=0.95pt}
+	]
+
+	% Service nodes
+	\node[service] (web) {web};
+	\node[service, left=of web] (bot) {bot};
+	\node[service, right=of web] (db) {db};
+	\node[service, below=of web] (speciesnet) {speciesnet};
+
+	% Volume and bind mount nodes
+	\node[bindmount, above left=18mm and 18mm of web] (Vstatic) {./static};
+	\node[bindmount, above=of web] (Vmonitorstatic) {./monitor/static};
+	\node[volume, left=34mm of speciesnet] (Vmediavolume) {media\_volume};
+	\node[volume, below=of speciesnet] (Vspeciesnetcache) {speciesnet\_cache};
+	\node[volume, below=of db] (Vdbdata) {db\_data};
+
+	% Inter-service communication
+	\draw[app] (bot) -- (web);
+	\draw[app] (web) -- (db);
+	\draw[app] (web) -- (speciesnet);
+
+	% Volume mounts / bind mounts
+	\draw[mount] (Vstatic) -- node[above, sloped, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/static} (web);
+	\draw[mount] (Vmonitorstatic) -- node[right, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/monitor/static} (web);
+	\draw[mount] (Vmediavolume) -- node[above, sloped, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/media} (web);
+	\draw[mount] (Vmediavolume) -- node[below, sloped, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/media} (bot);
+	\draw[mount] (Vspeciesnetcache) -- node[right, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/.cache} (speciesnet);
+	\draw[mount] (Vmediavolume) -- node[below, sloped, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/app/media} (speciesnet);
+	\draw[mount] (Vdbdata) -- node[right, fill=white, inner sep=1pt, font=\ttfamily\scriptsize] {/var/lib/postgresql/data} (db);
+
+	\end{tikzpicture}
 	\caption{Arquitectura de contenedores Docker del servidor.}
 	\label{fig:docker-compose-arquitectura}
 \end{figure}
