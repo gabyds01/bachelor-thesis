@@ -1728,57 +1728,34 @@ Las pruebas del sistema completo se realizaron en dos fases:
 
 \section{Arquitectura general}
 
-El sistema propuesto se compone de tres capas principales que trabajan de forma
-coordinada para lograr la detección y notificación de eventos en tiempo
-operativo:
+El sistema propuesto se divide conceptualmente en dos grandes bloques operativos que trabajan de forma coordinada para lograr la detección y notificación de eventos:
 
-\begin{enumerate}
-  \item \textbf{Capa de percepción:} Formada por los nodos de cámara
-    (mesh-node) equipados con sensor \gls{pir} y módulo de cámara,
-    responsables de detectar movimiento y capturar imágenes.
-  \item \textbf{Capa de red:} Constituida por la red \gls{ESP-MESH-LITE} que
-    permite la comunicación entre nodos de cámara y el nodo raíz,
-    extendiendo la cobertura sin infraestructura adicional. Cada nodo
-    posee su propia pila de red \gls{lwip} y puede comunicarse con el
-    servidor de forma independiente.
-  \item \textbf{Capa de aplicación:} Compuesta por el servidor de
-    procesamiento que recibe las imágenes, realiza la inferencia
-    mediante \gls{ia} y notifica al usuario a través de \gls{telegram-bot}.
-\end{enumerate}
+\begin{itemize}
+  \item \textbf{Red MESH:} Constituye la infraestructura de despliegue en campo. Está compuesta por los nodos terminales (\textit{Leaf}), los nodos intermedios (\textit{Relay}) y el nodo puerta de enlace (\textit{Root}). Estos dispositivos conforman una red inalámbrica auto-gestionada mediante el protocolo \gls{ESP-MESH-LITE}, encargándose de la vigilancia del entorno, captura fotográfica y propagación de los datos hacia internet.
+  \item \textbf{Backend:} Representa la infraestructura de procesamiento centralizado. Recibe de manera asíncrona las imágenes provenientes de la Red MESH, orquesta la inferencia mediante modelos de inteligencia artificial (\gls{speciesnet}), persiste los metadatos en una base de datos y emite alertas automáticas al usuario final a través de la integración con Telegram.
+\end{itemize}
 
 La Figura~\ref{fig:arquitectura-general} presenta un diagrama de alto nivel
-de la arquitectura del sistema.
-
-% TODO: Corregir la imagen de arquitectura general del sistema
+de esta arquitectura.
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=.8\textwidth]{img/arquitecturaGeneralH.jpg}
-  % \fbox{\parbox{0.9\textwidth}{\centering\vspace{3cm}
-  %     [Diagrama de arquitectura general del sistema]
-  %     \vspace{3cm}}}
-  \caption{Arquitectura general del sistema de monitoreo y alerta temprana.}
+  \caption{Arquitectura general del sistema de monitoreo, dividida en Red MESH y Backend.}
   \label{fig:arquitectura-general}
 \end{figure}
 
 \newpage
 
-El flujo de datos del sistema opera de la siguiente manera:
+El flujo integral de la información opera de la siguiente manera:
 
 \begin{enumerate}
-  \item El sensor \gls{pir} detecta movimiento y genera una interrupción
-    en el microcontrolador.
-  \item El nodo de cámara captura una imagen en formato \gls{jpeg}.
-  \item El nodo realiza una petición HTTP POST al servidor, que se propaga
-    de forma transparente a través de la red \gls{ESP-MESH-LITE}: cada
-    nodo intermedio reenvía los paquetes en la capa de red hasta
-    alcanzar el nodo raíz, que los entrega al router Wi-Fi.
-  \item El servidor recibe la imagen y la procesa con \gls{speciesnet} (que
-    incluye \gls{megadetector} y modelos de clasificación taxonómica).
-  \item Si se detecta un objeto de interés con alto grado de confianza,
-    el bot de Telegram notifica al usuario enviando la imagen original,
-    la imagen anotada con las detecciones, y la lista de clasificaciones.
-  \item Las imágenes y metadatos se almacenan en la base de datos.
+  \item El sensor \gls{pir} de un nodo \textit{Leaf} o \textit{Relay} detecta movimiento, desencadenando la reactivación del microcontrolador desde su estado de reposo.
+  \item El nodo captura una imagen en formato \gls{jpeg}.
+  \item El nodo origina una petición HTTP POST dirigida al \textit{Backend}. Esta petición viaja saltando a través de los nodos \textit{Relay} de la red MESH hasta alcanzar al nodo \textit{Root}, quien finalmente la inyecta al router Wi-Fi para su salida a internet.
+  \item El servidor recibe la imagen y delega su procesamiento al contenedor de \gls{speciesnet} (que ejecuta los modelos de detección y clasificación taxonómica).
+  \item Si el análisis identifica objetos de interés superando el umbral de confianza predefinido, el bot de Telegram notifica al usuario de forma inmediata, adjuntando la evidencia visual (imágenes limpias y anotadas) y las probabilidades predictivas.
+  \item Todos los eventos, clasificaciones e imágenes quedan respaldados en la base de datos relacional del sistema.
 \end{enumerate}
 
 \section{Nodos de cámara (Leaf y Relay)}
