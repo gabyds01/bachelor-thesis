@@ -1939,34 +1939,26 @@ módulo de cámara, que actúa como puerta de enlace entre la red
 
 \subsection{Firmware del nodo raíz}
 
-El firmware del nodo raíz implementa:
+El firmware del nodo raíz actúa como el coordinador central de la red mallada, garantizando la conectividad ininterrumpida de todo el sistema. A diferencia de los nodos de cámara, este componente opera exclusivamente como enrutador y servidor de la malla, excluyendo la carga de controladores periféricos (como la cámara OV2640 o el sensor PIR) y descartando el uso de modos de bajo consumo (\textit{Sleep Modes}).
+
+La inicialización específica y el ciclo de vida del nodo raíz, ilustrados en la Figura~\ref{fig:diagrama-firmware-root}, implementan las siguientes responsabilidades clave:
 
 \begin{itemize}
-  \item Inicialización como nodo raíz de la red \gls{ESP-MESH-LITE}
-  \item Conexión Wi-Fi al router doméstico para acceso a internet
-  \item Reenvío transparente de paquetes IP desde los nodos hijos
-    hacia la red externa
-  \item Asignación de direcciones IP a nodos hijos directamente conectados
+  \item \textbf{Jerarquía exclusiva:} Mediante la configuración del firmware, se fuerza al dispositivo a operar estrictamente en el Nivel 1 de la topología MESH, conectándose directamente al router Wi-Fi externo (modo \textit{Station}).
+  \item \textbf{Punto de Acceso permanente:} La interfaz \textit{SoftAP} se mantiene siempre activa, aguardando y gestionando la conexión de nodos hijos (tanto intermedios como terminales).
+  \item \textbf{Enrutamiento transparente:} Actuando como puente de red (\textit{Bridge}), provee NAT, asignación de direcciones IP dinámicas y reenvío de los paquetes provenientes de la malla hacia internet.
+  \item \textbf{Gestión y diagnóstico:} Se registra un conjunto de manejadores de mensajes para interpretar la actividad de los nodos y se ejecuta un temporizador periódico que reporta el estado de la red (canal Wi-Fi, cantidad de hijos conectados, RSSI) cada 10 segundos.
+  \item \textbf{Limpieza de rutas:} Se ajusta el \textit{timeout} de desconexión de la interfaz a 60 segundos para eliminar rápidamente de la tabla de ruteo a cualquier nodo hijo que haya perdido el enlace.
 \end{itemize}
-
-A diferencia de los nodos de cámara, el nodo raíz no necesita procesar ni
-inspeccionar las imágenes transmitidas. Su función principal es actuar como
-puente entre la red mesh y la red IP externa, reenviando los paquetes de
-forma transparente en la capa de red.
-
-La Figura~\ref{fig:diagrama-firmware-root} muestra el flujo de inicialización
-del nodo raíz.
 
 \begin{figure}[htbp]
   \centering
-  % \includegraphics[width=0.6\textwidth]{figures/diagrama-firmware-root.png}
-  \fbox{\parbox{0.6\textwidth}{\centering\vspace{3cm}
-      [Diagrama de flujo del firmware del nodo raíz]
-  \vspace{3cm}}}
-  \caption{Diagrama de flujo del firmware del nodo raíz.}
+  \includegraphics[width=0.7\textwidth]{img/Diagramas Tesis-Diagra de Flujo nodo Root.jpg}
+  \caption{Diagrama de flujo de inicialización y operación continua del nodo raíz.}
   \label{fig:diagrama-firmware-root}
 \end{figure}
 
+\newpage
 \subsection{Conexión con la red externa}
 
 El nodo raíz es el único punto de salida a internet de la red mesh. Se conecta
