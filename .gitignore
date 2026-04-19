@@ -15,6 +15,7 @@
 *.pdf
 
 ## Intermediate documents:
+docs/
 *.dvi
 *.xdv
 *-converted-to.*

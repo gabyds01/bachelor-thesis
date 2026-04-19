@@ -1781,7 +1781,14 @@ El flujo de datos del sistema opera de la siguiente manera:
   \item Las imágenes y metadatos se almacenan en la base de datos.
 \end{enumerate}
 
-\section{Nodo de cámara (mesh-node)}
+\section{Nodos de cámara (Leaf y Relay)}
+
+La arquitectura del sistema define dos roles distintos para los nodos equipados con cámara, a pesar de que ambos comparten el mismo hardware. Esta separación, definida mediante configuración, permite equilibrar el alcance de la red y el consumo energético:
+
+\begin{itemize}
+  \item \textbf{Nodo Intermedio (Relay):} Extiende la cobertura de la red permitiendo que otros nodos se conecten a él (actúa como router), además de realizar funciones de cámara. Utiliza modos de reposo ligero para mantener la conectividad MESH de forma constante.
+  \item \textbf{Nodo Hoja (Leaf):} Nodo terminal enfocado en el ultra bajo consumo. Utiliza el modo de reposo profundo (\textit{Deep Sleep}) apagando su radio Wi-Fi y su CPU principal, despertando únicamente cuando el coprocesador detecta movimiento.
+\end{itemize}
 
 \subsection{Selección de componentes}
 
@@ -1803,42 +1810,54 @@ principales:
 
 \subsection{Diseño del firmware}
 
-El firmware del nodo de cámara se desarrolló utilizando \gls{ESP-IDF} y
-\gls{ESP-MESH-LITE}, implementando las siguientes funcionalidades:
+El firmware de los nodos de cámara se desarrolló utilizando \gls{ESP-IDF} y \gls{ESP-MESH-LITE}, adoptando un diseño modular. El arranque inicial y las configuraciones básicas son compartidas, mientras que la gestión de energía y el monitoreo de eventos difieren según el rol (Leaf o Relay).
+
+El flujo general de ejecución (ilustrado en la Figura~\ref{fig:diagrama-flujo-general}) comprende:
 
 \begin{itemize}
-  \item Inicialización y configuración de la cámara OV2640
-  \item Configuración del pin GPIO como interrupción externa para el sensor PIR
-  \item Conexión a la red \gls{ESP-MESH-LITE} como nodo hijo en modo \gls{AP-STA}
-  \item Captura y compresión de imágenes en formato \gls{jpeg}
-  \item Almacenamiento local de imágenes en tarjeta microSD como respaldo
-  \item Transmisión de imágenes al servidor mediante peticiones HTTP POST,
-    propagadas de forma transparente a través de la red mesh
-  \item Gestión del modo \gls{power-save} para reducir consumo energético
+  \item Inicialización del sistema base (NVS, \textit{event loop}, interfaces de red).
+  \item Configuración de la red \gls{ESP-MESH-LITE} en modo \gls{AP-STA} (o solo estación para los nodos hoja).
+  \item Inicialización condicional de la tarjeta microSD.
+  \item Configuración de las interrupciones o rutinas de detección correspondientes al sensor \gls{pir}.
+  \item Una vez establecida la conexión MESH y obtenida una IP, se ejecuta la rutina de monitoreo. Si hay detección, se captura y envía la foto.
 \end{itemize}
-
-El ciclo de operación sigue el siguiente flujo: una tarea de \gls{freertos}
-(\texttt{pir\_task}) permanece bloqueada esperando una notificación de la
-\gls{isr} del sensor \gls{pir}. Cuando se detecta movimiento, la interrupción
-notifica a la tarea, que procede a capturar una imagen, almacenarla localmente
-en la tarjeta microSD como respaldo, y transmitirla al servidor mediante una
-petición HTTP POST a través de la red \gls{ESP-MESH-LITE}. Una vez completada
-la transmisión, la tarea vuelve a bloquearse en espera de la siguiente
-detección.
-
-La Figura~\ref{fig:diagrama-firmware-nodo} ilustra este flujo de operación.
 
 \begin{figure}[htbp]
   \centering
-  % \includegraphics[width=0.7\textwidth]{img/diagramaFlujoLeaf.png}
-  \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm}
-      [Diagrama de flujo del firmware del nodo de cámara]
-  \vspace{3cm}}}
-  \caption{Diagrama de flujo del firmware del nodo de cámara.}
-  \label{fig:diagrama-firmware-nodo}
+  \includegraphics[width=0.6\textwidth]{img/Diagramas Tesis-Diagrama de Flujo General.jpg}
+  \caption{Diagrama de flujo general de inicialización de los nodos de cámara.}
+  \label{fig:diagrama-flujo-general}
 \end{figure}
 
-\subsection{Captura de imágenes}
+\newpage
+Para el \textbf{Nodo Intermedio (Relay)}, el ciclo de vida (Figura~\ref{fig:diagrama-energia-relay}) aprovecha un modo de reposo ligero (\textit{Light Sleep}) gestionado de forma automática por el sistema operativo, permitiendo a la radio Wi-Fi utilizar \textit{Modem Sleep} pero manteniendo siempre la conectividad MESH activa. Una tarea de \gls{freertos} bloqueada espera una notificación del sensor PIR para proceder a la captura.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{img/Diagramas Tesis-Gestión de Energia nodo Raley Parte 1.jpg}
+  
+  \vspace{0.5cm}
+  
+  \includegraphics[width=0.3\textwidth]{img/Diagramas Tesis-Gestión de Energia nodo Raley Parte 2.jpg}
+  \caption{Diagrama de gestión de energía del nodo intermedio (Relay).}
+  \label{fig:diagrama-energia-relay}
+\end{figure}
+
+Para el \textbf{Nodo Hoja (Leaf)}, el flujo cambia drásticamente (Figura~\ref{fig:diagrama-energia-leaf}). Al no requerir mantener conexiones para otros nodos, el firmware apaga la interfaz Wi-Fi y pone al CPU principal en reposo profundo (\textit{Deep Sleep}). La vigilancia queda a cargo del coprocesador de ultra bajo consumo (\textbf{ULP}). Cuando se detecta movimiento, el coprocesador ULP despierta al CPU principal, el cual ejecuta el flujo compartido de reconexión, envía la foto, y vuelve a entrar en \textit{Deep Sleep}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\textwidth]{img/Diagramas Tesis-Gestion de Energia nodo Leaf Parte 1.jpg}
+  
+  \vspace{0.3cm}
+  
+  \includegraphics[width=0.3\textwidth]{img/Diagramas Tesis-Gestion de Energia nodo Leaf Parte 2.jpg}
+  \caption{Diagrama de gestión de energía del nodo terminal (Leaf).}
+  \label{fig:diagrama-energia-leaf}
+\end{figure}
+
+\newpage
+\subsection{Captura y envío de imágenes}
 
 La captura de imágenes se realiza con los siguientes parámetros:
 
@@ -1848,6 +1867,15 @@ La captura de imágenes se realiza con los siguientes parámetros:
   \item[Tamaño típico:] Entre 30 y 35 KB por imagen
 \end{description}
 
+El proceso detallado de la obtención del fotograma y su transmisión se describe en la Figura~\ref{fig:diagrama-captura}. La cámara requiere descartar los primeros fotogramas (\textit{warm-up}) para estabilizar los niveles de exposición y balance de blancos automáticos. Posteriormente, se evalúa la disponibilidad de la tarjeta SD para guardar una copia de respaldo antes de enviar el paquete HTTP POST mediante la red MESH.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.6\textwidth]{img/Diagramas Tesis-Captura y Envio de Foto.jpg}
+  \caption{Flujo de captura, almacenamiento y transmisión de imágenes.}
+  \label{fig:diagrama-captura}
+\end{figure}
+
 Gracias a la arquitectura de \gls{ESP-MESH-LITE}, donde cada nodo posee su
 propia pila de red \gls{lwip} y puede realizar peticiones HTTP de forma
 independiente, no existen restricciones artificiales en el tamaño de los datos
@@ -1856,14 +1884,14 @@ imagen con el tiempo de transmisión inalámbrica.
 
 \subsection{Integración del sensor PIR}
 
-El sensor HC-SR501 se conecta a un pin GPIO del ESP32-CAM configurado
-como fuente de interrupción externa. Cuando el sensor detecta movimiento
-(cambio en la radiación infrarroja), genera una señal HIGH que dispara
-una \gls{isr}. Esta rutina de interrupción notifica a la tarea
-\texttt{pir\_task} de \gls{freertos}, que se encontraba bloqueada en espera,
-para que proceda con la captura y transmisión de la imagen.
+El sensor HC-SR501 se conecta a un pin GPIO del ESP32-CAM. Dado que el sistema presenta dos modos de operación distintos, la integración del sensor se aborda mediante dos estrategias diferentes:
 
-El sensor permite ajustar:
+\begin{itemize}
+  \item \textbf{En el nodo Relay:} El pin GPIO se configura como fuente de interrupción externa convencional. Al detectar movimiento, genera una señal HIGH que dispara una \gls{isr}. Esta rutina notifica a la tarea principal, despertando al CPU de su estado de \textit{Light Sleep} para procesar el evento.
+  \item \textbf{En el nodo Leaf:} Durante el estado de \textit{Deep Sleep}, la matriz de interrupciones está apagada. La vigilancia se delega al coprocesador ULP. Como el ULP FSM no admite interrupciones de hardware, ejecuta un programa en ensamblador con un ciclo de \textit{polling} que despierta cada \qty{100}{ms} para leer el estado del registro RTC asociado al GPIO. Si detecta el estado HIGH, emite la instrucción \texttt{wake} para reactivar el CPU principal.
+\end{itemize}
+
+El sensor permite ajustar en su propio \textit{hardware}:
 \begin{itemize}
   \item \textbf{Sensibilidad:} Distancia de detección (\qtyrange{3}{7}{m})
   \item \textbf{Tiempo de retardo:} Duración de la señal HIGH (\qtyrange{5}{300}{s})
@@ -1992,14 +2020,12 @@ aunque en las pruebas realizadas se utilizaron únicamente 3 nodos.
 
 \subsection{Topología de la red}
 
-La red \gls{ESP-MESH-LITE} se organiza en una topología de árbol donde:
+La red \gls{ESP-MESH-LITE} se organiza en una topología de árbol, donde cada nodo asume uno de los siguientes roles configurables:
 
 \begin{description}
-  \item[Nodo raíz:] Único punto de conexión con la red externa (router Wi-Fi).
-    Actúa como puerta de enlace IP para toda la red mesh.
-  \item[Nodos intermedios:] Pueden existir nodos que actúen como repetidores,
-    reenviando paquetes de forma transparente en la capa de red.
-  \item[Nodos hoja:] Los nodos de cámara que capturan y transmiten imágenes.
+  \item[Nodo raíz (Root):] Nivel 1. Único punto de conexión con la red externa (router Wi-Fi). Actúa como puerta de enlace IP para toda la red mesh y permanece activo ininterrumpidamente.
+  \item[Nodos intermedios (Relay):] Extienden la red actuando como padres para otros nodos y reenviando paquetes de forma transparente en la capa de red. Simultáneamente, funcionan como cámaras utilizando modos de reposo ligero para no interrumpir el enrutamiento.
+  \item[Nodos hoja (Leaf):] Nodos de cámara terminales que no permiten la conexión de hijos. Se dedican exclusivamente a la captura y operan mayormente en reposo profundo (\textit{Deep Sleep}) para maximizar la autonomía.
 \end{description}
 
 Cada nodo opera en modo \gls{AP-STA}, actuando simultáneamente como
@@ -2333,31 +2359,18 @@ en configuración 2S (dos celdas en serie), proporcionando un voltaje
 nominal de \qty{7.4}{V}. El módulo \gls{buck-converter} LM2596 reduce este
 voltaje a \qty{5}{V} para alimentar el ESP32-CAM.
 
-El consumo energético varía según el estado de operación del nodo:
+Para maximizar la autonomía sin comprometer la conectividad de la red, el sistema implementa una arquitectura híbrida de gestión de energía, donde el consumo varía drásticamente según el rol y el estado de operación:
 
 \begin{description}
-  \item[Modo \gls{power-save} (espera):] El nodo permanece conectado a la red
-    \gls{ESP-MESH-LITE} con la radio Wi-Fi en modo de ahorro de energía,
-    mientras la tarea de \gls{freertos} espera bloqueada la notificación
-    del sensor \gls{pir}. El consumo se reduce al mantener la radio en
-    estado de baja potencia, pero el CPU permanece activo para responder
-    a eventos de la red mesh y del sensor.
+  \item[Modo Híbrido - Relay (\textit{Light Sleep + Modem Sleep}):] Los nodos intermedios deben mantener su conexión a la red \gls{ESP-MESH-LITE} para no romper la topología y permitir el enrutamiento. Utilizan un modo de ahorro donde la radio Wi-Fi se apaga parcialmente entre balizas y el CPU entra en \textit{Light Sleep}. Este estado reduce el consumo, pero requiere que el nodo esté parcialmente activo.
+  \item[Modo Híbrido - Leaf (\textit{Deep Sleep + ULP}):] Los nodos terminales, al no enrutar tráfico de terceros, entran en un estado de \textit{Deep Sleep} desconectándose completamente de la red. El consumo se reduce drásticamente (alrededor de \qty{10}{mA} a \qty{15}{mA} reales medidos en el prototipo, atribuibles mayormente al módulo regulador y la placa), ya que el trabajo de monitoreo queda exclusivamente a cargo del coprocesador ULP.
   \item[Captura de imagen:] Consumo elevado momentáneo durante la activación
     del sensor OV2640, la captura de la imagen y la compresión \gls{jpeg}
     en hardware.
-  \item[Transmisión:] Máximo consumo durante el envío de la petición HTTP
-    POST a través de la red mesh, con la radio Wi-Fi en máxima potencia.
+  \item[Transmisión:] Máximo consumo (alcanzando casi \qty{200}{mA}) durante la reconexión y el envío de la petición HTTP POST a través de la red mesh, con la radio Wi-Fi operando a máxima potencia.
 \end{description}
 
-Es importante destacar que el sistema utiliza el modo \gls{power-save} de Wi-Fi
-en lugar del modo \gls{deep-sleep} del ESP32. El modo \gls{deep-sleep}
-desconectaría completamente al nodo de la red mesh, impidiendo el reenvío de
-paquetes de otros nodos y rompiendo la topología de la red. Dado que en
-\gls{ESP-MESH-LITE} cada nodo puede actuar como intermediario para el reenvío
-de paquetes en la capa de red, es necesario que todos los nodos mantengan su
-conexión activa. En la sección de trabajos futuros se discute una arquitectura
-alternativa con nodos repetidores dedicados que permitiría el uso de
-\gls{deep-sleep} en los nodos de cámara.
+Esta dualidad en la arquitectura de energía permite combinar las fortalezas de la red \gls{ESP-MESH-LITE} con técnicas avanzadas de ahorro energético, resolviendo la restricción típica de las redes malladas donde el requerimiento de enrutamiento continuo penaliza la vida útil de las baterías en nodos puramente sensoriales. (Las mediciones detalladas de corriente y autonomía se presentan en el Capítulo 8).
 
 % ==============================================================================
 % Capítulo 8: Pruebas y Resultados
