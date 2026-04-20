@@ -2415,13 +2415,9 @@ evaluando:
   \item Tiempo de captura y compresión
 \end{itemize}
 
-% TODO: Agregar ejemplos de imágenes capturadas
 \begin{figure}[htbp]
   \centering
-  % \includegraphics[width=0.8\textwidth]{figures/ejemplo-captura.jpg}
-  \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
-      [Ejemplo de imagen capturada por el nodo - 640x480 JPEG]
-  \vspace{3cm}}}
+  \includegraphics[width=0.6\textwidth]{img/imagenCapturadaNodo.png}
   \caption{Ejemplo de imagen capturada por un nodo de cámara.}
   \label{fig:ejemplo-captura}
 \end{figure}
@@ -2486,14 +2482,10 @@ Se evaluó el pipeline de detección y clasificación con imágenes de prueba:
   \item Tiempo de inferencia por imagen
 \end{itemize}
 
-% TODO: Agregar ejemplo de imagen procesada con detecciones
 \begin{figure}[htbp]
   \centering
-  % \includegraphics[width=0.8\textwidth]{figures/ejemplo-deteccion.jpg}
-  \fbox{\parbox{0.8\textwidth}{\centering\vspace{3cm}
-      [Imagen anotada con bounding boxes y etiquetas de clasificación]
-  \vspace{3cm}}}
-  \caption{Ejemplo de imagen procesada por el sistema de detección.}
+  \includegraphics[width=0.6\textwidth]{img/imagenProcesada.png}
+  \caption{Ejemplo de imagen procesada por el sistema de detección en entorno de laboratorio.}
   \label{fig:ejemplo-deteccion}
 \end{figure}
 
@@ -2508,13 +2500,9 @@ Se verificó el funcionamiento del bot de Telegram:
   \item Tiempo desde captura hasta notificación
 \end{itemize}
 
-% TODO: Agregar screenshot de notificación de Telegram
 \begin{figure}[htbp]
   \centering
-  % \includegraphics[width=0.6\textwidth]{figures/telegram-notificacion.png}
-  \fbox{\parbox{0.6\textwidth}{\centering\vspace{4cm}
-      [Screenshot de notificación de Telegram con imágenes y detecciones]
-  \vspace{4cm}}}
+  \includegraphics[width=0.3\textwidth]{img/notificacionTelegram.png}
   \caption{Notificación recibida en Telegram con resultados de detección.}
   \label{fig:telegram-notificacion}
 \end{figure}
@@ -2615,6 +2603,28 @@ Durante las pruebas de campo se registraron los siguientes resultados:
   \item Tiempo de operación sin fallos: [X] horas
 \end{itemize}
 
+Además de detectar animales, las pruebas de campo demostraron la eficacia del sistema como herramienta de seguridad y vigilancia perimetral. La Figura~\ref{fig:ejemplos-deteccion-campo} ilustra detecciones exitosas de intrusos y vehículos no autorizados en el predio.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{img/capturaIntrusoProcesada.png}
+    \caption{Detección de intrusos (personas).}
+    \label{fig:deteccion-intruso}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{img/capturaAutoProcesada.jpg}
+    \caption{Detección de vehículos.}
+    \label{fig:deteccion-auto}
+  \end{subfigure}
+  \caption{Versatilidad del modelo demostrada durante las pruebas de campo.}
+  \label{fig:ejemplos-deteccion-campo}
+\end{figure}
+
+\newpage
 \section{Métricas de rendimiento de red}
 
 \subsection{Latencia de transmisión}
