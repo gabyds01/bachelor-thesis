@@ -2718,14 +2718,26 @@ Se midió el consumo eléctrico del nodo en diferentes estados de operación:
 
 \subsection{Autonomía estimada}
 
-Basándose en el consumo promedio y la capacidad de las baterías:
+La autonomía del nodo depende de la capacidad utilizable del pack de baterías y del consumo promedio ponderado. Es importante distinguir entre la capacidad nominal y la capacidad utilizable: las celdas de iones de litio 18650 no deben descargarse por debajo de \qty{2.5}{V} por celda para preservar su vida útil. En una configuración 2S, esto implica un voltaje mínimo del pack de \qty{5.0}{V}.
 
-\begin{itemize}
-  \item Capacidad del pack 2S: 3500 \unit{mAh}
-  \item Consumo promedio: 180 \unit{mA}
-  \item Autonomía teórica: 19 horas
-  \item Autonomía medida en pruebas: 5 horas
-\end{itemize}
+Sin embargo, el módulo regulador LM2596 (\gls{buck-converter}) requiere un margen de tensión (\textit{dropout}) de aproximadamente \qty{1.5}{V} por encima de su voltaje de salida (\qty{5}{V}), estableciendo un voltaje mínimo de entrada funcional de \qty{6.5}{V} (equivalente a \qty{3.25}{V} por celda). Cuando la tensión del pack cae por debajo de este umbral, el regulador no puede mantener una salida estable de \qty{5}{V}. Los picos de corriente característicos del ESP32-CAM durante la transmisión Wi-Fi (que pueden superar los \qty{300}{mA} instantáneos) provocan caídas momentáneas en la línea de alimentación, disparando la protección de \textit{brownout} del microcontrolador y reiniciándolo. Este comportamiento fue observado consistentemente durante las pruebas cuando la tensión de entrada al regulador descendía por debajo de \qtyrange{6}{7}{V}.
+
+En consecuencia, la capacidad efectivamente utilizable del pack es inferior a los \qty{3500}{mAh} nominales. Considerando la curva de descarga típica de las celdas 18650~\cite{powar2025discharge18650} y el corte práctico en \qty{3.25}{V} por celda, la capacidad aprovechable se reduce a aproximadamente un \qty{40}{\percent} de la nominal. La Figura~\ref{fig:curva-descarga} muestra la curva de descarga obtenida experimentalmente con las celdas utilizadas en el prototipo, donde se evidencia la caída pronunciada de tensión una vez superado el \qty{60}{\percent} de la capacidad.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{img/curvaDescargaBateria.png}
+  \caption{Curva de descarga de las celdas 18650 utilizadas en el prototipo.}
+  \label{fig:curva-descarga}
+\end{figure}
+
+\begin{description}
+  \item[Capacidad nominal del pack 2S:] \qty{3500}{mAh}
+  \item[Capacidad utilizable estimada:] $\approx$ \qty{1400}{mAh} (corte a \qty{6.5}{V} de entrada)
+  \item[Consumo promedio (modo Relay):] \qty{180}{mA}
+  \item[Autonomía teórica estimada:] $\approx$ \qtyrange{7}{8}{h}
+  \item[Autonomía medida en pruebas:] \qty{5}{h}
+\end{description}
 
 \section{Análisis de resultados}
 
