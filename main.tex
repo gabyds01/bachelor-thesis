@@ -2749,10 +2749,10 @@ análisis de los principales hallazgos:
 
 % TODO: Completar análisis de cumplimiento
 \begin{description}
-  \item[Detección de fauna:] [Análisis del desempeño en detección]
-  \item[Latencia de respuesta:] [Análisis de tiempos de respuesta]
-  \item[Cobertura de red:] [Análisis de alcance y estabilidad]
-  \item[Autonomía energética:] [Análisis de consumo y duración]
+  \item[Detección de fauna, personas y vehículos:] El sistema demostró capacidad de detección y clasificación para las tres categorías de interés. El modelo SpeciesNet, ejecutándose en el servidor sin GPU dedicada, procesó correctamente las imágenes capturadas por los nodos, generando detecciones con cuadros delimitadores y clasificación taxonómica para la fauna identificada (Figuras~\ref{fig:ejemplo-deteccion} y \ref{fig:ejemplos-deteccion-campo}).
+  \item[Latencia de respuesta:] El tiempo transcurrido desde la detección de movimiento hasta la notificación en Telegram se situó en el orden de los \qty{40}{s} en promedio. Si bien no constituye tiempo real en sentido estricto, representa una mejora de varios órdenes de magnitud frente a las cámaras trampa convencionales, donde el acceso a las imágenes requiere días o semanas de recolección manual.
+  \item[Cobertura de red:] La red mesh operó de forma estable con distancias de hasta \qty{18}{m} en línea de vista directa y \qty{12}{m} con vegetación intermedia. Estas distancias, aunque limitadas por las antenas integradas de baja ganancia del ESP32-CAM, son suficientes para un despliegue en cadena con nodos intermedios (Relay).
+  \item[Autonomía energética:] Se logró una autonomía medida de \qty{5}{h} en modo Relay (\textit{Light Sleep}), mientras que el modo Leaf (\textit{Deep Sleep} + ULP) demostró un consumo en reposo de \qty{13}{mA}, lo que proyecta autonomías significativamente superiores para nodos que no requieren enrutamiento continuo.
 \end{description}
 
 \subsection{Limitaciones observadas}
@@ -2760,29 +2760,12 @@ análisis de los principales hallazgos:
 Durante las pruebas se identificaron las siguientes limitaciones:
 
 \begin{itemize}
-  \item Limitación 1 observada
-  \item Limitación 2 observada
-  \item Limitación 3 observada
+  \item \textbf{Sensor PIR domótico:} El HC-SR501 está optimizado para la detección de personas. Su sensibilidad puede ser insuficiente para fauna de menor porte o animales de sangre fría, lo que podría generar falsos negativos en escenarios de monitoreo biológico puro.
+  \item \textbf{Alcance limitado por antena integrada:} La antena PCB del módulo ESP32-CAM restringe el rango efectivo de comunicación. En vegetación densa, las distancias se reducen considerablemente, requiriendo mayor densidad de nodos intermedios.
+  \item \textbf{Brownout por agotamiento de batería:} Cuando la tensión del pack 2S desciende por debajo de \qtyrange{6}{7}{V}, el regulador LM2596 no puede compensar los picos de corriente del módulo Wi-Fi, provocando reinicios por \textit{brownout} que interrumpen la operación del nodo.
+  \item \textbf{Ausencia de visión nocturna:} El sensor OV2640 no cuenta con iluminación infrarroja, limitando la captura de imágenes útiles a condiciones de luz diurna o crepuscular.
 \end{itemize}
 
-\subsection{Comparación con objetivos planteados}
-
-% TODO: Agregar tabla comparativa
-\begin{table}[htbp]
-  \centering
-  \caption{Comparación de resultados con objetivos planteados.}
-  \label{tab:comparacion-objetivos}
-  \begin{tabular}{lcc}
-    \hline
-    \textbf{Métrica}       & \textbf{Objetivo}    & \textbf{Resultado} \\
-    \hline
-    Latencia de respuesta  & < X min              & [X] min            \\
-    Precisión de detección & > [X]\unit{\percent} & [X]\unit{\percent} \\
-    Autonomía              & > X horas            & [X] horas          \\
-    Cobertura              & > [X] \unit{m}       & [X] \unit{m}       \\
-    \hline
-  \end{tabular}
-\end{table}
 
 % ==============================================================================
 % Capítulo 9: Conclusiones
