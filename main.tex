@@ -3275,7 +3275,7 @@ los subsistemas comunes (NVS, Wi-Fi, ESP-MESH-Lite) y selecciona el módulo de o
 (Root, Relay o Leaf) según la configuración de compilación definida en Kconfig. El
 código~\ref{lst:app-main} presenta esta función.
 
-\lstinputlisting[firstline=98, lastline=169, firstnumber=98, caption={Función principal \texttt{app\_main()} con selección de rol del nodo.}, label=lst:app-main]{trapcam_mesh/main/main.c}
+\lstinputlisting[firstline=98, lastline=169, firstnumber=98, caption={Función principal \texttt{app\_main()} con selección de rol del nodo.}, label=lst:app-main]{src/trapcam_mesh/main/main.c}
 
 \section{Coprocesador ULP para sensado PIR}
 
@@ -3285,7 +3285,7 @@ El ULP lee periódicamente el estado del GPIO~12 (mapeado a RTC\_GPIO15) y, al
 detectar un nivel alto (movimiento), almacena banderas en la memoria RTC compartida
 y despierta a la CPU principal. El código~\ref{lst:ulp_assembly} presenta esta rutina.
 
-\lstinputlisting[language={[x86masm]Assembler}, firstline=1, lastline=67, firstnumber=1, caption={Rutina del coprocesador ULP en ensamblador para sensado PIR pasivo (\texttt{pir\_monitor.S}).}, label=lst:ulp_assembly]{trapcam_mesh/main/ulp/pir_monitor.S}
+\lstinputlisting[language={[x86masm]Assembler}, firstline=1, lastline=67, firstnumber=1, caption={Rutina del coprocesador ULP en ensamblador para sensado PIR pasivo (\texttt{pir\_monitor.S}).}, label=lst:ulp_assembly]{src/trapcam_mesh/main/ulp/pir_monitor.S}
 
 El código~\ref{lst:ulp_c_driver} muestra las funciones \texttt{ulp\_pir\_init()} y
 \texttt{ulp\_pir\_enter\_deep\_sleep()} del módulo \texttt{ulp\_pir.c}, responsables
@@ -3293,7 +3293,7 @@ de cargar el binario ULP en la memoria RTC, configurar el GPIO como entrada RTC 
 resistencia pull-down, y gestionar la transición al modo Deep Sleep con el ULP como
 fuente de despertar.
 
-\lstinputlisting[firstline=33, lastline=136, firstnumber=33, caption={Carga del binario ULP en memoria RTC y transición a Deep Sleep (\texttt{ulp\_pir.c}).}, label=lst:ulp_c_driver]{trapcam_mesh/main/leaf_node/ulp_pir.c}
+\lstinputlisting[firstline=33, lastline=136, firstnumber=33, caption={Carga del binario ULP en memoria RTC y transición a Deep Sleep (\texttt{ulp\_pir.c}).}, label=lst:ulp_c_driver]{src/trapcam_mesh/main/leaf_node/ulp_pir.c}
 
 \section{Transmisión HTTP Multipart en streaming}
 
@@ -3304,7 +3304,7 @@ de streaming por sockets evita duplicar el buffer de la imagen en memoria, envia
 los datos directamente en partes consecutivas (cabecera, datos de imagen, cierre)
 a través de la conexión HTTP abierta.
 
-\lstinputlisting[firstline=453, lastline=566, firstnumber=453, caption={Transmisión optimizada de imágenes HTTP Multipart mediante streaming de sockets (\texttt{leaf\_node.c}).}, label=lst:multipart_streaming]{trapcam_mesh/main/leaf_node/leaf_node.c}
+\lstinputlisting[firstline=453, lastline=566, firstnumber=453, caption={Transmisión optimizada de imágenes HTTP Multipart mediante streaming de sockets (\texttt{leaf\_node.c}).}, label=lst:multipart_streaming]{src/trapcam_mesh/main/leaf_node/leaf_node.c}
 
 \section{Gestión de energía del nodo repetidor}
 
@@ -3315,7 +3315,7 @@ el modo Modem Power Save de Wi-Fi y, si está disponible en la configuración de
 activa el Light Sleep automático con escalamiento dinámico de frecuencia entre
 \qty{80}{\mega\hertz} y \qty{240}{\mega\hertz}.
 
-\lstinputlisting[firstline=260, lastline=299, firstnumber=260, caption={Configuración de Power Management y Light Sleep automático en nodos repetidores (\texttt{relay\_node.c}).}, label=lst:power_management_relay]{trapcam_mesh/main/relay_node/relay_node.c}
+\lstinputlisting[firstline=260, lastline=299, firstnumber=260, caption={Configuración de Power Management y Light Sleep automático en nodos repetidores (\texttt{relay\_node.c}).}, label=lst:power_management_relay]{src/trapcam_mesh/main/relay_node/relay_node.c}
 
 \section{Servidor de detección}
 

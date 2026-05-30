@@ -5,5 +5,5 @@
 	path = src/wildlife-detection-capstone-project
 	url = https://github.com/fabcontigiani/wildlife-detection-capstone-project.git
 [submodule "trapcam_mesh"]
-	path = trapcam_mesh
+	path = src/trapcam_mesh
 	url = https://github.com/gabyds01/trapcam_mesh.git
