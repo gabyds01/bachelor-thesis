@@ -76,7 +76,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
-\lhead{\small\itshape\leftmark}
+\lhead{\small\itshape\nouppercase{\leftmark}}
 \rhead{}
 \lfoot{}
 \cfoot{\thepage}
@@ -3309,7 +3309,7 @@ El ULP lee periódicamente el estado del GPIO~12 (mapeado a RTC\_GPIO15) y, al
 detectar un nivel alto (movimiento), almacena banderas en la memoria RTC compartida
 y despierta a la CPU principal. El código~\ref{lst:ulp_assembly} presenta esta rutina.
 
-\lstinputlisting[language={[x86masm]Assembler}, firstline=1, lastline=67, firstnumber=1, caption={Rutina del coprocesador ULP en ensamblador para sensado PIR pasivo (\texttt{pir\_monitor.S}).}, label=lst:ulp_assembly]{src/trapcam_mesh/main/ulp/pir_monitor.S}
+\lstinputlisting[language={[x86masm]Assembler}, firstline=1, lastline=67, firstnumber=1, caption={Rutina del coprocesador ULP en ensamblador para sensado PIR pasivo.}, label=lst:ulp_assembly]{src/trapcam_mesh/main/ulp/pir_monitor.S}
 
 El código~\ref{lst:ulp_c_driver} muestra las funciones \texttt{ulp\_pir\_init()} y
 \texttt{ulp\_pir\_enter\_deep\_sleep()} del módulo \texttt{ulp\_pir.c}, responsables
