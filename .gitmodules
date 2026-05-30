@@ -4,9 +4,6 @@
 [submodule "src/wildlife-detection-capstone-project"]
 	path = src/wildlife-detection-capstone-project
 	url = https://github.com/fabcontigiani/wildlife-detection-capstone-project.git
-[submodule "src/mesh-node-capstone-project"]
-	path = src/mesh-node-capstone-project
-	url = https://github.com/fabcontigiani/mesh-node-capstone-project.git
-[submodule "src/root-node-capstone-project"]
-	path = src/root-node-capstone-project
-	url = https://github.com/fabcontigiani/root-node-capstone-project.git
+[submodule "trapcam_mesh"]
+	path = trapcam_mesh
+	url = https://github.com/gabyds01/trapcam_mesh.git

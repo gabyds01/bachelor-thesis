@@ -3292,47 +3292,54 @@ implementaciones:
 
 \chapter{Código fuente relevante}
 
-\section{Firmware del nodo mesh}
+\section{Punto de entrada del firmware}
 
-El archivo principal del firmware del nodo mesh (\texttt{mesh\_node.c}) contiene
-la lógica de inicialización, captura de imágenes, detección de movimiento y
-comunicación con la red mesh. El código~\ref{lst:app-main} presenta la función
-principal \texttt{app\_main()} que inicializa todos los componentes del sistema.
+El archivo \texttt{main.c} contiene la función principal \texttt{app\_main()} que inicializa
+los subsistemas comunes (NVS, Wi-Fi, ESP-MESH-Lite) y selecciona el módulo de operación
+(Root, Relay o Leaf) según la configuración de compilación definida en Kconfig. El
+código~\ref{lst:app-main} presenta esta función.
 
-\lstinputlisting[firstline=634, lastline=730, firstnumber=634, caption={Función principal \texttt{app\_main()} del nodo mesh.}, label=lst:app-main]{src/mesh-node-capstone-project/main/mesh_node.c}
+\lstinputlisting[firstline=98, lastline=169, firstnumber=98, caption={Función principal \texttt{app\_main()} con selección de rol del nodo.}, label=lst:app-main]{trapcam_mesh/main/main.c}
 
-El código~\ref{lst:capture-photo} muestra la función
-\texttt{capture\_and\_save\_photo()}, responsable de capturar una imagen,
-guardarla en la tarjeta SD y transmitirla a través de la red mesh.
+\section{Coprocesador ULP para sensado PIR}
 
-\lstinputlisting[firstline=419, lastline=483, firstnumber=419, caption={Función de captura y envío de imágenes.}, label=lst:capture-photo]{src/mesh-node-capstone-project/main/mesh_node.c}
+El programa del coprocesador ULP, escrito en ensamblador (\texttt{pir\_monitor.S}),
+implementa la rutina de monitoreo del sensor PIR en modo de ultra bajo consumo.
+El ULP lee periódicamente el estado del GPIO~12 (mapeado a RTC\_GPIO15) y, al
+detectar un nivel alto (movimiento), almacena banderas en la memoria RTC compartida
+y despierta a la CPU principal. El código~\ref{lst:ulp_assembly} presenta esta rutina.
 
-\section{Firmware del nodo raíz}
+\lstinputlisting[language={[x86masm]Assembler}, firstline=1, lastline=67, firstnumber=1, caption={Rutina del coprocesador ULP en ensamblador para sensado PIR pasivo (\texttt{pir\_monitor.S}).}, label=lst:ulp_assembly]{trapcam_mesh/main/ulp/pir_monitor.S}
 
-El nodo raíz actúa como puerta de enlace entre la red mesh y el servidor remoto.
-Su firmware (\texttt{root\_node.c}) implementa la recepción de imágenes desde
-los nodos de cámara y su transmisión al servidor mediante HTTP POST.
+El código~\ref{lst:ulp_c_driver} muestra las funciones \texttt{ulp\_pir\_init()} y
+\texttt{ulp\_pir\_enter\_deep\_sleep()} del módulo \texttt{ulp\_pir.c}, responsables
+de cargar el binario ULP en la memoria RTC, configurar el GPIO como entrada RTC con
+resistencia pull-down, y gestionar la transición al modo Deep Sleep con el ULP como
+fuente de despertar.
 
-El código~\ref{lst:root-app-main} muestra la función \texttt{app\_main()} del
-nodo raíz, que configura la red mesh en modo raíz fijo e inicializa las tareas
-de recepción y transmisión de datos.
+\lstinputlisting[firstline=33, lastline=136, firstnumber=33, caption={Carga del binario ULP en memoria RTC y transición a Deep Sleep (\texttt{ulp\_pir.c}).}, label=lst:ulp_c_driver]{trapcam_mesh/main/leaf_node/ulp_pir.c}
 
-\lstinputlisting[firstline=457, lastline=521, firstnumber=457, caption={Función principal \texttt{app\_main()} del nodo raíz.}, label=lst:root-app-main]{src/root-node-capstone-project/main/root_node.c}
+\section{Transmisión HTTP Multipart en streaming}
 
-El código~\ref{lst:root-task} presenta la función \texttt{root\_task()}, que
-implementa el bucle principal de recepción de datos desde la red mesh. Esta
-tarea espera hasta que el nodo se establezca como raíz, luego recibe datos
-de los nodos hijos mediante \texttt{mwifi\_root\_read()} y los encola para
-su transmisión HTTP.
+El código~\ref{lst:multipart_streaming} presenta la función
+\texttt{upload\_photo\_to\_server()} del módulo \texttt{leaf\_node.c}, que implementa
+la transmisión optimizada de imágenes al servidor mediante HTTP Multipart. La técnica
+de streaming por sockets evita duplicar el buffer de la imagen en memoria, enviando
+los datos directamente en partes consecutivas (cabecera, datos de imagen, cierre)
+a través de la conexión HTTP abierta.
 
-\lstinputlisting[firstline=215, lastline=336, firstnumber=215, caption={Tarea de recepción de datos de la red mesh.}, label=lst:root-task]{src/root-node-capstone-project/main/root_node.c}
+\lstinputlisting[firstline=453, lastline=566, firstnumber=453, caption={Transmisión optimizada de imágenes HTTP Multipart mediante streaming de sockets (\texttt{leaf\_node.c}).}, label=lst:multipart_streaming]{trapcam_mesh/main/leaf_node/leaf_node.c}
 
-El código~\ref{lst:http-post-task} muestra la tarea \texttt{http\_post\_task()},
-responsable de enviar las imágenes recibidas al servidor Django mediante
-solicitudes HTTP POST con formato multipart. La tarea construye el cuerpo de la
-solicitud incluyendo la dirección MAC del nodo origen y los datos de la imagen.
+\section{Gestión de energía del nodo repetidor}
 
-\lstinputlisting[firstline=41, lastline=205, firstnumber=41, caption={Tarea de envío HTTP al servidor.}, label=lst:http-post-task]{src/root-node-capstone-project/main/root_node.c}
+El código~\ref{lst:power_management_relay} muestra la función
+\texttt{setup\_power\_management()} del módulo \texttt{relay\_node.c}, que configura
+el modo híbrido de ahorro de energía para los nodos repetidores. Esta función habilita
+el modo Modem Power Save de Wi-Fi y, si está disponible en la configuración del proyecto,
+activa el Light Sleep automático con escalamiento dinámico de frecuencia entre
+\qty{80}{\mega\hertz} y \qty{240}{\mega\hertz}.
+
+\lstinputlisting[firstline=260, lastline=299, firstnumber=260, caption={Configuración de Power Management y Light Sleep automático en nodos repetidores (\texttt{relay\_node.c}).}, label=lst:power_management_relay]{trapcam_mesh/main/relay_node/relay_node.c}
 
 \section{Servidor de detección}
 
